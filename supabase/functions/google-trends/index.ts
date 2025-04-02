@@ -19,7 +19,7 @@ const handleCors = (req: Request) => {
   return null;
 };
 
-// Mock function to simulate Google Trends data since the direct API is challenging
+// Function to generate simulated trend data
 async function generateTrendData(keyword: string, startTime?: string, endTime?: string) {
   try {
     // Generate a time range from startTime (or 1 year ago) to endTime (or now)
@@ -93,7 +93,7 @@ serve(async (req) => {
     
     console.log(`Fetching trend data for keyword: ${keyword}`);
     
-    // Instead of using the problematic Google Trends API, use our reliable simulation function
+    // Generate reliable simulated trend data
     const trendData = await generateTrendData(keyword, startTime, endTime);
     
     if (!trendData || trendData.length === 0) {
