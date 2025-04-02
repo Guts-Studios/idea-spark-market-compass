@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import DashboardCard from "@/components/DashboardCard";
 import TrendChart from "@/components/TrendChart";
 import { marketTrendsData } from "@/lib/mockData";
-import { Badge } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const MarketTrends = () => {
