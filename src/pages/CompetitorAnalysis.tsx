@@ -4,7 +4,6 @@ import Navbar from "@/components/Navbar";
 import DashboardCard from "@/components/DashboardCard";
 import CompetitorCard from "@/components/CompetitorCard";
 import { competitorsData } from "@/lib/mockData";
-import { BarChart } from "recharts";
 import { ResponsiveBar } from "@nivo/bar";
 
 const CompetitorAnalysis = () => {
