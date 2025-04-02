@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import IdeaForm from "@/components/IdeaForm";
-import { BarChart2, TrendingUp, MessageSquare, Users } from "lucide-react";
+import { BarChart2, TrendingUp, MessageSquare, Users, LogIn } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -21,7 +21,10 @@ const Index = () => {
               </Link>
             ) : (
               <Link to="/auth">
-                <Button>Sign In</Button>
+                <Button className="flex items-center gap-2">
+                  <LogIn size={18} />
+                  <span>Sign In</span>
+                </Button>
               </Link>
             )}
           </div>
@@ -39,23 +42,33 @@ const Index = () => {
               real-time data analysis, competitor insights, and sentiment analysis.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gap-2" asChild>
-                <a href="#start">
-                  <span>Start Analysis</span>
-                </a>
-              </Button>
               {user ? (
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/dashboard">
-                    <span>View Dashboard</span>
-                  </Link>
-                </Button>
+                <>
+                  <Button size="lg" className="gap-2" asChild>
+                    <Link to="/dashboard">
+                      <span>Go to Dashboard</span>
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <a href="#start">
+                      <span>Start Analysis</span>
+                    </a>
+                  </Button>
+                </>
               ) : (
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/auth">
-                    <span>Sign In</span>
-                  </Link>
-                </Button>
+                <>
+                  <Button size="lg" className="gap-2" asChild>
+                    <Link to="/auth">
+                      <LogIn className="h-5 w-5" />
+                      <span>Sign In / Register</span>
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <a href="#start">
+                      <span>Try Without Account</span>
+                    </a>
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -126,6 +139,17 @@ const Index = () => {
                 Submit Your Business Idea
               </h2>
               <IdeaForm />
+              {!user && (
+                <div className="mt-6 pt-4 border-t text-center">
+                  <p className="text-muted-foreground mb-2">Create an account to save your results</p>
+                  <Link to="/auth">
+                    <Button variant="outline" className="gap-2">
+                      <LogIn size={16} />
+                      <span>Sign In or Register</span>
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>
