@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -255,7 +254,7 @@ const Auth = () => {
                         <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input placeholder="your@email.com" {...field} />
-                        </Control>
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
