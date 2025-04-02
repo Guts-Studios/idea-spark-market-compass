@@ -8,6 +8,8 @@ import DashboardCard from "@/components/DashboardCard";
 import TrendChart from "@/components/TrendChart";
 import SentimentGauge from "@/components/SentimentGauge";
 import { dashboardSummary, sentimentData, marketTrendsData } from "@/lib/mockData";
+import TrendSearch from "@/components/TrendSearch";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Dashboard = () => {
   // Set document title
@@ -26,6 +28,20 @@ const Dashboard = () => {
               Comprehensive insights for your product idea: Eco-friendly Water Bottles
             </p>
           </div>
+
+          {/* Live Data Alert */}
+          <Alert className="mb-8 bg-blue-50 border-blue-200">
+            <TrendingUp className="h-4 w-4 text-blue-500" />
+            <AlertTitle>Live Google Trends Data Available</AlertTitle>
+            <AlertDescription>
+              You can now search for any product or keyword to see real-time market trend data from Google Trends.
+            </AlertDescription>
+          </Alert>
+
+          {/* Google Trends Search */}
+          <DashboardCard title="Live Market Trends" className="mb-10">
+            <TrendSearch defaultKeyword="eco-friendly water bottle" />
+          </DashboardCard>
 
           {/* Viability Score */}
           <div className="mb-10">
@@ -95,7 +111,6 @@ const Dashboard = () => {
                 <Progress 
                   value={dashboardSummary.consumerSentiment === "Favorable" ? 75 : dashboardSummary.consumerSentiment === "Neutral" ? 50 : 25} 
                   className="h-2" 
-                  color="bg-green-500"
                 />
               </div>
             </DashboardCard>
@@ -111,7 +126,7 @@ const Dashboard = () => {
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <DashboardCard title="Search Trend Analysis">
+            <DashboardCard title="Search Trend Analysis (Historical)">
               <TrendChart 
                 data={marketTrendsData.trendOverTime}
                 xKey="month"
