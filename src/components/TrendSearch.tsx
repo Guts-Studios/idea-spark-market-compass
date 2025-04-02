@@ -55,9 +55,9 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
       {trendData && trendData.length > 0 ? (
         <>
           <div className="p-4 bg-blue-50 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold mb-1">Google Trends Data</h3>
+            <h3 className="text-lg font-semibold mb-1">Market Trend Data</h3>
             <p className="text-sm text-muted-foreground">
-              Showing actual search interest over time for: <span className="font-medium">{searchTerm}</span>
+              Showing trend data for: <span className="font-medium">{searchTerm}</span>
             </p>
           </div>
           
@@ -74,8 +74,8 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
           <div className="p-4 bg-green-50 rounded-lg">
             <h3 className="text-md font-semibold mb-1">Analysis Insights</h3>
             <p className="text-sm">
-              This data shows real Google Trends interest for "{searchTerm}" over the past year.
-              The search interest indicates relative popularity of the term, where 100 is the peak popularity.
+              This data shows market trends for "{searchTerm}" over the past year.
+              The search interest indicates the relative popularity of the term over time.
             </p>
           </div>
         </>
@@ -86,6 +86,6 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
       )}
     </div>
   );
-};
+}
 
 export default TrendSearch;

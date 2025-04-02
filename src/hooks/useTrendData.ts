@@ -32,8 +32,8 @@ export function useTrendData() {
         throw new Error(response.error);
       }
 
-      setData(response.data);
-      return response.data;
+      setData(response.data || []);
+      return response.data || [];
     } catch (err: any) {
       const errorMessage = err.message || 'An error occurred while fetching trend data';
       setError(errorMessage);
