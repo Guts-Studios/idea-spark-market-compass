@@ -101,7 +101,7 @@ async function fetchGoogleTrendsData(keyword: string, startTime?: string, endTim
     
     if (!parsedResults.default?.timelineData) {
       console.error("No timeline data found in the response");
-      return [];
+      throw new Error("No trend data available for this keyword");
     }
     
     // Transform the data into our expected format
@@ -147,33 +147,49 @@ serve(async (req) => {
     console.log(`Processing trend data for keyword: ${keyword}`);
     
     let trendData;
+    let isMockData = false;
     
     try {
       // Attempt to fetch real Google Trends data
       trendData = await fetchGoogleTrendsData(keyword, startTime, endTime);
+      console.log(`Successfully fetched real Google Trends data for ${keyword}`);
     } catch (error) {
       // Log the error
-      console.error(`Failed to fetch real data: ${error.message}. Using mock data instead.`);
+      console.error(`Failed to fetch real data: ${error.message}`);
       
-      // Generate mock data as fallback
-      trendData = generateMockTrendData(keyword, startTime, endTime);
-      
-      // Log that we're using mock data
-      console.log(`Generated ${trendData.length} mock data points for ${keyword}`);
+      // For certain errors, we might want to generate mock data
+      if (error.message.includes("[unenv]") || error.message.includes("request is not implemented")) {
+        // Generate mock data but mark it clearly
+        isMockData = true;
+        trendData = generateMockTrendData(keyword, startTime, endTime);
+        console.log(`Generated ${trendData.length} mock data points for ${keyword}`);
+      } else {
+        // For other errors, we'll pass the error to the client
+        throw new Error(`Unable to fetch trend data: ${error.message}`);
+      }
     }
     
     if (!trendData || trendData.length === 0) {
-      // Generate mock data if no data was found
-      console.log("No data found. Generating mock data.");
-      trendData = generateMockTrendData(keyword, startTime, endTime);
+      return new Response(
+        JSON.stringify({ 
+          error: "No trend data available for this keyword",
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 404,
+        }
+      );
     }
     
-    // Return the processed data
+    // Return the processed data with an indicator if it's mock data
     return new Response(
       JSON.stringify({ 
         data: trendData, 
         keyword,
-        message: "Trend data processed successfully" 
+        isMockData,
+        message: isMockData 
+          ? "Showing simulated trend data due to API limitations" 
+          : "Trend data processed successfully" 
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
