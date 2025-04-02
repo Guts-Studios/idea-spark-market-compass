@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { interestOverTime } from "https://esm.sh/google-trends-api@4.9.2";
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -19,10 +20,10 @@ const handleCors = (req: Request) => {
   return null;
 };
 
-// Function to generate simulated trend data
-async function generateTrendData(keyword: string, startTime?: string, endTime?: string) {
+// Function to fetch real Google Trends data
+async function fetchGoogleTrendsData(keyword: string, startTime?: string, endTime?: string) {
   try {
-    // Generate a time range from startTime (or 1 year ago) to endTime (or now)
+    // Parse date ranges
     const now = new Date();
     const endTimeDate = endTime ? new Date(endTime) : now;
     
@@ -31,49 +32,41 @@ async function generateTrendData(keyword: string, startTime?: string, endTime?: 
     defaultStartTime.setFullYear(now.getFullYear() - 1);
     const startTimeDate = startTime ? new Date(startTime) : defaultStartTime;
     
-    // Generate 12 data points (roughly monthly)
-    const months = [];
-    const dataPoints = [];
+    console.log(`Fetching trends for keyword: ${keyword}, from ${startTimeDate.toISOString()} to ${endTimeDate.toISOString()}`);
+
+    // Call Google Trends API with the specified parameters
+    const results = await interestOverTime({
+      keyword: keyword,
+      startTime: startTimeDate,
+      endTime: endTimeDate,
+      geo: '', // Empty string for worldwide data
+    });
     
-    let currentDate = new Date(startTimeDate);
+    // Parse the results
+    const parsedResults = JSON.parse(results);
     
-    // Generate monthly data points
-    while (currentDate <= endTimeDate) {
-      const month = currentDate.toLocaleString('default', { month: 'short' });
-      
-      // Base value is between 40-90 with randomized fluctuations
-      // We add a bias based on the keyword to ensure consistent results for the same keyword
-      const keywordHash = keyword.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 30;
-      const baseValue = (40 + keywordHash) + Math.floor(Math.random() * 50);
-      
-      // Ensure value is between 0-100 (Google Trends scale)
-      const searchValue = Math.min(100, Math.max(0, baseValue));
-      
-      // Calculate consumer interest as a percentage of search value, 
-      // but make sure it stays within the 0-100 range
-      const interestValue = Math.min(100, Math.max(0, 
-        Math.round(searchValue * (0.7 + Math.random() * 0.3))
-      ));
-      
-      months.push(month);
-      dataPoints.push({
-        month,
-        searches: searchValue,
-        interest: interestValue,
-        formattedTime: `${month} ${currentDate.getFullYear()}`,
-        date: currentDate.toISOString(),
-      });
-      
-      // Move to next month
-      currentDate.setMonth(currentDate.getMonth() + 1);
+    if (!parsedResults.default?.timelineData) {
+      console.error("No timeline data found in the response");
+      return [];
     }
     
-    // Sort data by date
-    dataPoints.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Transform the data into our expected format
+    const formattedData = parsedResults.default.timelineData.map((point: any) => {
+      const date = new Date(parseInt(point.time) * 1000);
+      const month = date.toLocaleString('default', { month: 'short' });
+      
+      return {
+        month,
+        searches: point.value[0], // Search interest value
+        interest: Math.round(point.value[0] * (0.7 + Math.random() * 0.3)), // Estimated consumer interest
+        formattedTime: `${month} ${date.getFullYear()}`,
+        date: date.toISOString(),
+      };
+    });
     
-    return dataPoints;
+    return formattedData;
   } catch (error) {
-    console.error("Error generating trend data:", error);
+    console.error("Error fetching Google Trends data:", error);
     throw error;
   }
 }
@@ -97,10 +90,10 @@ serve(async (req) => {
       );
     }
     
-    console.log(`Fetching trend data for keyword: ${keyword}`);
+    console.log(`Fetching real trend data for keyword: ${keyword}`);
     
-    // Generate reliable simulated trend data
-    const trendData = await generateTrendData(keyword, startTime, endTime);
+    // Fetch real Google Trends data
+    const trendData = await fetchGoogleTrendsData(keyword, startTime, endTime);
     
     if (!trendData || trendData.length === 0) {
       return new Response(
@@ -117,7 +110,7 @@ serve(async (req) => {
       JSON.stringify({ 
         data: trendData, 
         keyword,
-        message: "Trend data fetched successfully" 
+        message: "Real Google Trends data fetched successfully" 
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
