@@ -47,13 +47,19 @@ async function generateTrendData(keyword: string, startTime?: string, endTime?: 
       const baseValue = (40 + keywordHash) + Math.floor(Math.random() * 50);
       
       // Ensure value is between 0-100 (Google Trends scale)
-      const value = Math.min(100, Math.max(0, baseValue));
+      const searchValue = Math.min(100, Math.max(0, baseValue));
+      
+      // Calculate consumer interest as a percentage of search value, 
+      // but make sure it stays within the 0-100 range
+      const interestValue = Math.min(100, Math.max(0, 
+        Math.round(searchValue * (0.7 + Math.random() * 0.3))
+      ));
       
       months.push(month);
       dataPoints.push({
         month,
-        searches: value,
-        interest: Math.round(value * 0.8 + Math.random() * value * 0.4), // Simulated related interest
+        searches: searchValue,
+        interest: interestValue,
         formattedTime: `${month} ${currentDate.getFullYear()}`,
         date: currentDate.toISOString(),
       });
