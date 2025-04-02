@@ -4,16 +4,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import IdeaForm from "@/components/IdeaForm";
 import { BarChart2, TrendingUp, MessageSquare, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-sky-50">
       <header className="bg-white shadow-sm">
         <div className="container mx-auto py-4 px-4 lg:px-8 flex justify-between items-center">
           <h1 className="text-xl md:text-2xl font-bold text-primary">MarketCompass</h1>
-          <Link to="/dashboard">
-            <Button variant="outline">Demo Dashboard</Button>
-          </Link>
+          <div className="flex gap-2">
+            {user ? (
+              <Link to="/dashboard">
+                <Button>Dashboard</Button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <Button>Sign In</Button>
+              </Link>
+            )}
+          </div>
         </div>
       </header>
 
@@ -33,11 +44,19 @@ const Index = () => {
                   <span>Start Analysis</span>
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link to="/dashboard">
-                  <span>View Demo</span>
-                </Link>
-              </Button>
+              {user ? (
+                <Button size="lg" variant="outline" asChild>
+                  <Link to="/dashboard">
+                    <span>View Dashboard</span>
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="lg" variant="outline" asChild>
+                  <Link to="/auth">
+                    <span>Sign In</span>
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
           <div className="rounded-lg overflow-hidden shadow-xl">
