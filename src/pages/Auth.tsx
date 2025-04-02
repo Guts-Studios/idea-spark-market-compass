@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +12,8 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // Schema for login form
 const loginSchema = z.object({
@@ -36,6 +39,11 @@ const resetPasswordSchema = z.object({
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<"login" | "signup" | "reset">("login");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
+  const [resetSuccess, setResetSuccess] = useState<boolean>(false);
   const { user, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,6 +75,15 @@ const Auth = () => {
     },
   });
 
+  // Clear form errors when switching tabs
+  useEffect(() => {
+    setLoginError(null);
+    setSignupError(null);
+    setResetError(null);
+    setSignupSuccess(false);
+    setResetSuccess(false);
+  }, [activeTab]);
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -78,31 +95,41 @@ const Auth = () => {
   // Handle login submission
   const onLoginSubmit = async (data: z.infer<typeof loginSchema>) => {
     try {
+      setLoginError(null);
       await signIn(data.email, data.password);
       toast({
         title: "Login successful",
         description: "Welcome back to MarketCompass",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      setLoginError(error.message || "Failed to sign in. Please check your credentials.");
     }
   };
 
   // Handle signup submission
   const onSignupSubmit = async (data: z.infer<typeof signupSchema>) => {
     try {
+      setSignupError(null);
       await signUp(data.email, data.password, data.fullName);
-    } catch (error) {
+      setSignupSuccess(true);
+      signupForm.reset();
+    } catch (error: any) {
       console.error("Signup error:", error);
+      setSignupError(error.message || "Failed to create account. Please try again.");
     }
   };
 
   // Handle reset password submission
   const onResetSubmit = async (data: z.infer<typeof resetPasswordSchema>) => {
     try {
+      setResetError(null);
       await resetPassword(data.email);
-    } catch (error) {
+      setResetSuccess(true);
+      resetForm.reset();
+    } catch (error: any) {
       console.error("Reset password error:", error);
+      setResetError(error.message || "Failed to send reset email. Please try again.");
     }
   };
 
@@ -129,6 +156,14 @@ const Auth = () => {
             </TabsList>
             
             <TabsContent value="login">
+              {loginError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{loginError}</AlertDescription>
+                </Alert>
+              )}
+              
               <Form {...loginForm}>
                 <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
                   <FormField
@@ -178,105 +213,164 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
-              <Form {...signupForm}>
-                <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
-                  <FormField
-                    control={signupForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Your name" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signupForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="your@email.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signupForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="Password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={signupForm.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="Confirm password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={signupForm.formState.isSubmitting}
-                  >
-                    {signupForm.formState.isSubmitting ? "Creating account..." : "Create Account"}
-                  </Button>
-                </form>
-              </Form>
+              {signupError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{signupError}</AlertDescription>
+                </Alert>
+              )}
+              
+              {signupSuccess && (
+                <Alert className="mb-4 bg-green-50 border-green-200">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800">Success</AlertTitle>
+                  <AlertDescription className="text-green-700">
+                    Account created successfully! Please check your email for verification instructions.
+                    <br />
+                    <Button 
+                      variant="link" 
+                      className="px-0 font-normal text-sm text-green-700"
+                      onClick={() => setActiveTab("login")}
+                    >
+                      Go to login
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {!signupSuccess && (
+                <Form {...signupForm}>
+                  <form onSubmit={signupForm.handleSubmit(onSignupSubmit)} className="space-y-4">
+                    <FormField
+                      control={signupForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="your@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={signupForm.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Confirm password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={signupForm.formState.isSubmitting}
+                    >
+                      {signupForm.formState.isSubmitting ? "Creating account..." : "Create Account"}
+                    </Button>
+                  </form>
+                </Form>
+              )}
             </TabsContent>
             
             <TabsContent value="reset">
-              <Form {...resetForm}>
-                <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
-                  <FormField
-                    control={resetForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="your@email.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              {resetError && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{resetError}</AlertDescription>
+                </Alert>
+              )}
+              
+              {resetSuccess && (
+                <Alert className="mb-4 bg-green-50 border-green-200">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800">Success</AlertTitle>
+                  <AlertDescription className="text-green-700">
+                    Reset email sent successfully! Please check your inbox for further instructions.
+                    <br />
+                    <Button 
+                      variant="link" 
+                      className="px-0 font-normal text-sm text-green-700"
+                      onClick={() => setActiveTab("login")}
+                    >
+                      Back to login
+                    </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              {!resetSuccess && (
+                <Form {...resetForm}>
+                  <form onSubmit={resetForm.handleSubmit(onResetSubmit)} className="space-y-4">
+                    <FormField
+                      control={resetForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="your@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="submit" 
+                      className="w-full" 
+                      disabled={resetForm.formState.isSubmitting}
+                    >
+                      {resetForm.formState.isSubmitting ? "Sending reset email..." : "Send Reset Email"}
+                    </Button>
+                  </form>
+                </Form>
+              )}
+              
+              {!resetSuccess && (
+                <div className="mt-4 text-center">
                   <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={resetForm.formState.isSubmitting}
+                    variant="link" 
+                    className="px-0 font-normal text-sm"
+                    onClick={() => setActiveTab("login")}
                   >
-                    {resetForm.formState.isSubmitting ? "Sending reset email..." : "Send Reset Email"}
+                    Back to login
                   </Button>
-                </form>
-              </Form>
-              <div className="mt-4 text-center">
-                <Button 
-                  variant="link" 
-                  className="px-0 font-normal text-sm"
-                  onClick={() => setActiveTab("login")}
-                >
-                  Back to login
-                </Button>
-              </div>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
