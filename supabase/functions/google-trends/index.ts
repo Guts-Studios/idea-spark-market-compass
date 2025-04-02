@@ -1,7 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { interestOverTime } from "https://esm.sh/google-trends-api@4.9.2";
+// Fix the import to use the correct module export
+import googleTrends from "https://esm.sh/google-trends-api@4.9.2";
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -35,7 +36,7 @@ async function fetchGoogleTrendsData(keyword: string, startTime?: string, endTim
     console.log(`Fetching trends for keyword: ${keyword}, from ${startTimeDate.toISOString()} to ${endTimeDate.toISOString()}`);
 
     // Call Google Trends API with the specified parameters
-    const results = await interestOverTime({
+    const results = await googleTrends.interestOverTime({
       keyword: keyword,
       startTime: startTimeDate,
       endTime: endTimeDate,
