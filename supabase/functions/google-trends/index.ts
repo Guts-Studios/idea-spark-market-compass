@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { corsHeaders, handleCors } from "./cors.ts";
 import { fetchGoogleTrendsData } from "./fetchTrendsData.ts";
 
@@ -11,7 +10,21 @@ serve(async (req) => {
   
   try {
     // Parse request
-    const { keyword, startTime, endTime } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (parseError) {
+      console.error("Error parsing request body:", parseError);
+      return new Response(
+        JSON.stringify({ error: "Invalid JSON in request body" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+    
+    const { keyword, startTime, endTime } = requestBody;
     
     if (!keyword) {
       return new Response(

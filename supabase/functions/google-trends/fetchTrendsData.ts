@@ -21,6 +21,7 @@ export async function fetchGoogleTrendsData(keyword: string, startTime?: string,
       startTime: startTimeDate,
       endTime: endTimeDate,
       geo: '', // Empty string for worldwide data
+      timeout: 30000, // Increase timeout to 30 seconds
     });
     
     // Parse the results
