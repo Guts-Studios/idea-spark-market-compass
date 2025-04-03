@@ -1,7 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, handleCors } from "./cors.ts";
-import { fetchGoogleTrendsData } from "./fetchTrendsData.ts";
+import { fetchGoogleTrendsData, generateMockTrendsData } from "./fetchTrendsData.ts";
 
 serve(async (req) => {
   // Handle CORS
@@ -39,7 +39,7 @@ serve(async (req) => {
     console.log(`Processing trend data for keyword: ${keyword}`);
     
     try {
-      // Attempt to fetch real Google Trends data
+      // First attempt to fetch real Google Trends data
       const trendData = await fetchGoogleTrendsData(keyword, startTime, endTime);
       console.log(`Successfully fetched real Google Trends data for ${keyword}`);
       
@@ -56,29 +56,22 @@ serve(async (req) => {
         }
       );
     } catch (error) {
-      // For any errors, we'll pass them to the client with relevant information
-      console.error(`Error fetching trend data: ${error.message}`);
+      // If real data fetching fails, generate mock data
+      console.log(`Failed to fetch real data: ${error.message}. Falling back to mock data.`);
       
-      let errorMessage = "Unable to fetch trend data";
-      let errorDetails = error.message || "Unknown error";
+      const mockData = generateMockTrendsData(keyword, startTime, endTime);
       
-      // Provide more specific error messages for common cases
-      if (error.message.includes("[unenv]") || error.message.includes("request is not implemented")) {
-        errorMessage = "Google Trends API access is currently unavailable";
-        errorDetails = "The server environment can't access the Google Trends API";
-      } else if (error.message.includes("quota")) {
-        errorMessage = "API quota exceeded";
-        errorDetails = "Google Trends API request limit reached. Please try again later";
-      }
-      
+      // Return the mock data with a note that it's mock data
       return new Response(
         JSON.stringify({ 
-          error: errorMessage,
-          details: errorDetails
+          data: mockData,
+          keyword,
+          isMock: true,
+          message: "Using generated mock trend data"
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 503, // Service Unavailable
+          status: 200,
         }
       );
     }
@@ -98,3 +91,4 @@ serve(async (req) => {
     );
   }
 });
+

@@ -13,11 +13,13 @@ export function useTrendData() {
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isMockData, setIsMockData] = useState(false);
   const { toast } = useToast();
 
   const fetchTrendData = async ({ keyword, startTime, endTime }: TrendDataParams) => {
     setIsLoading(true);
     setError(null);
+    setIsMockData(false);
 
     try {
       const { data: response, error } = await supabase.functions.invoke('google-trends', {
@@ -30,6 +32,17 @@ export function useTrendData() {
 
       if (response.error) {
         throw new Error(response.error);
+      }
+
+      // Check if the data is mock/simulated
+      setIsMockData(response.isMock === true);
+      
+      if (response.isMock) {
+        toast({
+          title: 'Using simulated trend data',
+          description: 'Real-time Google Trends data is currently unavailable.',
+          variant: 'default',
+        });
       }
 
       setData(response.data || []);
@@ -52,6 +65,8 @@ export function useTrendData() {
     trendData: data,
     isLoading,
     error,
+    isMockData,
     fetchTrendData,
   };
 }
+

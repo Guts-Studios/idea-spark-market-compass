@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useTrendData } from '@/hooks/useTrendData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, AlertCircle, BarChart2 } from 'lucide-react';
+import { Loader2, AlertCircle, BarChart2, InfoIcon } from 'lucide-react';
 import TrendChart from '@/components/TrendChart';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
@@ -14,7 +14,7 @@ interface TrendSearchProps {
 const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendly water bottle" }) => {
   const [keyword, setKeyword] = useState(defaultKeyword);
   const [searchTerm, setSearchTerm] = useState(defaultKeyword);
-  const { trendData, isLoading, error, fetchTrendData } = useTrendData();
+  const { trendData, isLoading, error, isMockData, fetchTrendData } = useTrendData();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +59,12 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
             <h3 className="text-lg font-semibold mb-1">Market Trend Data</h3>
             <p className="text-sm text-muted-foreground">
               Showing trend data for: <span className="font-medium">{searchTerm}</span>
+              {isMockData && (
+                <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                  <InfoIcon className="h-3 w-3 mr-1" />
+                  Simulated Data
+                </span>
+              )}
             </p>
           </div>
           
@@ -77,6 +83,11 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
             <p className="text-sm">
               This data shows market trends for "{searchTerm}" over the past year.
               The search interest indicates the relative popularity of the term over time.
+              {isMockData && (
+                <span className="block mt-2 text-amber-600">
+                  Note: This is simulated data as real-time Google Trends data could not be accessed.
+                </span>
+              )}
             </p>
           </div>
         </>
