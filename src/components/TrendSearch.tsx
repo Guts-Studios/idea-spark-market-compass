@@ -14,7 +14,7 @@ interface TrendSearchProps {
 const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendly water bottle" }) => {
   const [keyword, setKeyword] = useState(defaultKeyword);
   const [searchTerm, setSearchTerm] = useState(defaultKeyword);
-  const { trendData, isLoading, error, isMockData, fetchTrendData } = useTrendData();
+  const { trendData, isLoading, error, fetchTrendData } = useTrendData();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,17 +55,11 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
 
       {trendData && trendData.length > 0 ? (
         <>
-          <div className={`p-4 ${isMockData ? 'bg-amber-50 border border-amber-200' : 'bg-blue-50'} rounded-lg mb-4`}>
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-4">
             <h3 className="text-lg font-semibold mb-1">Market Trend Data</h3>
             <p className="text-sm text-muted-foreground">
               Showing trend data for: <span className="font-medium">{searchTerm}</span>
             </p>
-            {isMockData && (
-              <div className="mt-2 flex items-center text-amber-700 text-sm">
-                <AlertCircle className="h-4 w-4 mr-1" />
-                <span>Showing simulated data. Real-time Google Trends data is unavailable.</span>
-              </div>
-            )}
           </div>
           
           <TrendChart 
@@ -83,7 +77,6 @@ const TrendSearch: React.FC<TrendSearchProps> = ({ defaultKeyword = "eco-friendl
             <p className="text-sm">
               This data shows market trends for "{searchTerm}" over the past year.
               The search interest indicates the relative popularity of the term over time.
-              {isMockData && " (Note: This analysis is based on simulated data)"}
             </p>
           </div>
         </>
